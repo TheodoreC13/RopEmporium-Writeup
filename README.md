@@ -3,8 +3,19 @@ This repository contains my solutions to the ROP Emporium CTF Series, specifical
 
 There are plenty of guides that already exist for these challenges, I am instead going to focus on the things that gave me difficulty and my general process for solving this CTF series. 
 
+# Files Inlcuded
+
+exploit.py - My solution to the challenges, this singular script has all 8 solutions implemented.
+
+bytefinder.py - This is a scratch file to test some file loading/searching, I used this for pivot.
+
+expcallme.py - This is a separate callme solution (Functionally the same as my solution) I specifically wrote this because of an interaction I found on rerun of my entire solution. 2 challenges use the same name for different files. Because of this collision my callme solution fails in my script. 
+
+The rest of the files included are the ropemporium files. You could clone this and run the exploit script if you wanted. Callme will fail to decode the encrypted dat file. 
+
+
 # General Approach
-I started each challenge with static analysis utiizing readelf, objdump, and eventually ropper to begin.
+I started each challenge with static analysis utiizing readelf, objdump, and eventually ropper to begin. Sometimes I would run an ltrace or strace but quickly opted to just dynamically analyze files in gdb.
 * First I would run the binary normally
 * Second I would run the binary and test the overflow
 * After the initial introduction to the binary, I would use readelf, objdump, and ropper each in their own tab of my CLI to perform static analysis. Sometimes the challenges contain a "useful" function with specific rop gadgets. For the challenges that had this avenue available, I analyzed the gadgets and tried to figure out the "intended" solution. Almost all of the "useful" function rop gadgets available lead to a very obvious intended solution route.
