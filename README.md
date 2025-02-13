@@ -8,8 +8,7 @@ This repository contains my solutions to the ROP Emporium CTF series, focusing o
 * bytefinder.py: A scratch file used for testing file loading/searching, specifically used in the "pivot" challenge.
 * expcallme.py: A separate solution to the "callme" challenge. It's functionally the same as my solution but written to address an issue I encountered with a filename collision in the "encrypted_flag.dat" file.
 * exploitOutput.txt: output from terminal of the script running. Also shown at the end of this readme.
-
-The remaining files are the ROP Emporium challenge files. You can clone the repository and run the exploit script, but note that the "callme" challenge will fail to decode the encrypted dat file due to this collision.
+* ropemporium-zips: The collection of rop emporium zip files this script runs against.
 
 # General Approach
 
