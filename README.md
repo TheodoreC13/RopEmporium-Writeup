@@ -3,24 +3,6 @@ This repository contains my solutions to the ROP Emporium CTF Series, specifical
 
 There are plenty of guides that already exist for these challenges, I am instead going to focus on the things that gave me difficulty and my general process for solving this CTF series. 
 
-# Challenges
-
-1 - ret2win
-
-2 - split
-
-3 - callme
-
-4 - write4
-
-5 - badchars
-
-6 - fluff
-
-7 - pivot
-
-8 - ret2csu
-
 # General Approach
 I started each challenge with static analysis utiizing readelf, objdump, and eventually ropper to begin.
 * First I would run the binary normally
@@ -31,21 +13,31 @@ After intial analysis, I would start to craft my exploit in parallel with dynami
 
 After this, I would finish the rop chain and test the completion of the challenge for the flag return. Sometimes I would have to go and debug or change small pieces of my solution in order to consistently solve the challenge. A few times I would get about 80-90% of the challenge done and get stuck and have to reseach more about how the stack functions, how certain assembly instructions work, or specific issues I was encountering. 
 
-# Challenge - Specific Commentary
-This is a reflection on my undertaking of the rop empoirum CTF website. I've completed all CTFs in x86-64. Because plenty of guides already exist I will just be highlighting my lessons learned / struggles faced and not on the solutions themselves. 
+I specifically coded all of these challenges in one script instead of individual solutions to test some various features of pwntools. These tests are not shown on the final solution. 
+
+# Challenge Specific Commentary
+
 Challenge 1: ret2win 
-	This challenge introduces stack overwriting, overwrite the stack base pointer with the address of ret2win() and enjoy. I spent most of my time here introducing myself to pwntools python library and automating some testing. The only difficulty faced was understanding stack alignment and the movaps issue.
+* This challenge introduces stack overwriting, overwrite the stack base pointer with the address of ret2win() and enjoy. I spent most of my time here introducing myself to pwntools python library and automating some testing. The only difficulty faced was understanding stack alignment and the movaps issue.
+
 Challenge 2: split
-	This challenge actually required a real rop chain and not just a return. This was straightforward, but required some work with ropper instead of just objdump
+* This challenge actually required a real rop chain and not just a return. This was straightforward, but required some work with ropper instead of just objdump. This was my introduction to ropper.
+
 Challenge 3: callme
-	while writing this writeup and rerunning my solutions I found a curious fact; callme shares a filename with ret2csu (the 8th challenge) called "encrypted_flag.dat" these files are different and you can only have 1 "active" at a time. My script that attempts to solve all 8 files will not return the flag of the "other" challenge. To get around this I could import zipfile and unzip the archives before I run each to ensure smooth operation, but given the scope of this project I've opted to just attach visual proof of callme running and call it a day. 
+* While writing this writeup and rerunning my solutions I found a curious fact; callme shares a filename with ret2csu (the 8th challenge) called "encrypted_flag.dat" these files are different and you can only have 1 "active" at a time. My script that attempts to solve all 8 files will not return the flag of the other challenge. To get around this I could import zipfile and unzip the archives before I run each to ensure smooth operation, but given the scope of this project I've opted to just attach visual proof of callme running and call it a day.
+* This challenge was what pushed me to grab GDB Enhanced Features (GDB-GEF) for stronger debugging features as well as the GUI. A lot of time was saved seeing the output of all the registers and stack immediately after after instruction step instead of having to manually examine each register, the stack, etc. I **HIGHLY** recommend it. 
+
 Challenge 4: write4 - 
-	Oh so this is one of the ways you can arbitraily write to memory, neat. I had a lot of fun with this one. Some trial in error on deciding where to write to.
+* Oh so this is one of the ways you can arbitraily write to memory, neat. I had a lot of fun with this one. Some trial in error on deciding where to write to. 
+
 Challenge 5: badchars - 
-	lots of trial and error and a lot of research to refresh myself on binary operations. I knew the route to take for the solution but actually sitting down and getting there was tedious.
+* Lots of trial and error and a little of research to refresh myself on binary operations. I knew the route to take for the solution but actually sitting down and getting there was tedious.
+
 Challenge 6: fluff - 
-	This challenge gave me the most trouble. I had a good idea of how the 3 assembly instructions worked to create the write function, but actually understanding them so I could utilize them in my rop chain took my over a day of research and trial and error.
+* This challenge gave me the most trouble. I had a good idea of how the 3 assembly instructions worked to create the write function, but actually understanding them so I could utilize them in my rop chain took me over a day of research as well as a large amount of trial and error.
+
 Challenge 7: pivot - 
-	The answer was not just throwing the new stack location on the stack (why did I even think that would work?) It was setting the stack pointer to the new location. Also had some fun trying to read that location from the terminal in various ways to be able to grab it and add it to the ropchain. 
+* The answer was not just throwing the new stack location on the stack (why did I even think that would work?) It was setting the stack pointer to the new location. Also had some fun trying to read that location from the terminal in various ways to be able to grab it and add it to the ropchain. 
+
 Challenge 8: ret2csu -
-	I watched the blackhat talk 2-3 times while learning how this works. This challenge is actually only the first half of ret2csu. Instead of an actual ret2csu this is only like 80% of it. Instead of calling puts, or write you're calling ret2win() from the got. Shares a file with callme that breaks easily. 
+* I watched the blackhat talk 2-3 times while learning how this works. Shares a filename with callme that can break this challenge if you have the wrong one unzipped. I found this one to be fairly straightforward and easy after reading the paper. 
