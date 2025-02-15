@@ -29,6 +29,8 @@ I specifically chose to code all solutions in one script to experiment with feat
 
 As a special note on `ropper`: ropper has a functionality where it will attempt to automatically construct a rop-chain for you given the binary given. I specifically avoided using this feature as it felt like it would be "using a calculator before I understood multiplication." I assumed I would be cheating myself from learning something valuable. In hindsight I'm incredibly glad I did as I really enjoyed constructing these chains myself and learning how they work. While reflecting I do have a new question: Would ropper have found `bextr -> xlatb -> stosb` and I think I'm going to go test that later.
 
+test results: ropper finds the stack pivot chain in `pivot` but does not have x86-64 support for rop chain generation.
+
 # Challenge-Specific Commentary
 
 * Challenge 1: ret2win: This challenge introduces stack overwriting. The solution involved overwriting the stack base pointer with the address of `ret2win()` to redirect execution. The most difficult part was understanding stack alignment and the `movaps` issue. This was also my first time working with the `pwntools` library and automating tests.
